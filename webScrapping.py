@@ -1,9 +1,8 @@
 import requests 
 from bs4 import BeautifulSoup 
   
-def tech(): 
-    # the target we want to open     
-    url='https://finance.yahoo.com/screener/predefined/technology/'
+def scrap(newUrl, sector):
+    url=newUrl
       
     #open with GET method 
     resp=requests.get(url) 
@@ -11,7 +10,7 @@ def tech():
     #http_respone 200 means OK status 
     if resp.status_code==200: 
         
-        print("Tech Sector Yahoo Finance :") 
+        print(sector, "Sector:") 
       
         # we need a parser,Python built-in HTML parser is enough . 
         soup=BeautifulSoup(resp.text,'html.parser')     
@@ -19,415 +18,101 @@ def tech():
         l=soup.find("table",{"class":"W(100%)"}) 
         rows = l.findChildren('tr')
         total = 0
+        peTotal = 0
         for i,row in enumerate(rows):
                 cells = row.findChildren('td')
                 for idx,cell in enumerate(cells):
                     value = cell.string
-                    #if idx == 0 or idx == 4:
-                    #    print(value, end =" ")
+                    if idx == 0 or idx == 4:
+                        print(value, end =" ")
                     if idx == 4:
                         s = value.split('%')[0]
                         if "+" in s:
                             s1 = s.split('+')[1]
                             total += float(s1)
-                        else:
+                        elif "-" in s:
                             s1 = s.split('-')[1]
                             total -= float(s1)
+                    
+                    if idx == 8:
+                        if value != 'N/A':
+                            s = str(cell)
+                            s1 = s.split('-->')[1]
+                            s2 = s1.split('<!--')[0]
+                            s3 = s2.replace(",","")
+                            peTotal += float(s3)
+                            print(s3, end =" ")
+                        else:
+                            print("N/A", end = " ")
                         
-                        
-                #print()      
-        print("Total % Change:", total/i)
+                print()      
+        print("Total % Change: "+"{:.4f}".format(total/i))
+        print("Total PE Ratio: "+"{:.4f}".format(peTotal/i))
         print()
     else: 
         print("Error") 
+
+def tech():
+    url = 'https://finance.yahoo.com/sector/ms_technology' 
+    sector = 'Technology'
+    scrap(url, sector)
 
 def financial():
-    
     url='https://finance.yahoo.com/sector/ms_financial_services'
-    #open with GET method 
-    resp=requests.get(url) 
-      
-    #http_respone 200 means OK status 
-    if resp.status_code==200: 
-        
-        print("Financial Sector Yahoo Finance :") 
-      
-        # we need a parser,Python built-in HTML parser is enough . 
-        soup=BeautifulSoup(resp.text,'html.parser')     
-
-        l=soup.find("table",{"class":"W(100%)"}) 
-        rows = l.findChildren('tr')
-        total = 0
-        for i,row in enumerate(rows):
-                cells = row.findChildren('td')
-                for idx,cell in enumerate(cells):
-                    value = cell.string
-                    #if idx == 0 or idx == 4:
-                    #   print(value, end =" ")
-                    if idx == 4:
-                        s = value.split('%')[0]
-                        if "+" in s:
-                            s1 = s.split('+')[1]
-                            total += float(s1)
-                        elif "-" in s:
-                            s1 = s.split('-')[1]
-                            total -= float(s1)
-                        
-                        
-                #print()      
-        print("Total % Change:", total/i)
-        print()
-    else: 
-        print("Error") 
+    sector = 'Financial'
+    scrap(url, sector)
 
 def basicMaterial():
-    
     url='https://finance.yahoo.com/sector/ms_basic_materials'
-    #open with GET method 
-    resp=requests.get(url) 
-      
-    #http_respone 200 means OK status 
-    if resp.status_code==200: 
-        
-        print("Basic Materials Sector Yahoo Finance :") 
-      
-        # we need a parser,Python built-in HTML parser is enough . 
-        soup=BeautifulSoup(resp.text,'html.parser')     
-
-        l=soup.find("table",{"class":"W(100%)"}) 
-        rows = l.findChildren('tr')
-        total = 0
-        for i,row in enumerate(rows):
-                cells = row.findChildren('td')
-                for idx,cell in enumerate(cells):
-                    value = cell.string
-                    #if idx == 0 or idx == 4:
-                        #print(value, end =" ")
-                    if idx == 4:
-                        s = value.split('%')[0]
-                        if "+" in s:
-                            s1 = s.split('+')[1]
-                            total += float(s1)
-                        elif "-" in s:
-                            s1 = s.split('-')[1]
-                            total -= float(s1)
-                        
-                        
-                #print()      
-        print("Total % Change:", total/i)
-        print()
-    else: 
-        print("Error") 
+    sector = 'Basic Material'
+    scrap(url, sector)
+    
 
 def CommunicationService():
-    
     url='https://finance.yahoo.com/sector/ms_communication_services'
-    #open with GET method 
-    resp=requests.get(url) 
-      
-    #http_respone 200 means OK status 
-    if resp.status_code==200: 
-        
-        print("Communication Sector Yahoo Finance :") 
-      
-        # we need a parser,Python built-in HTML parser is enough . 
-        soup=BeautifulSoup(resp.text,'html.parser')     
-
-        l=soup.find("table",{"class":"W(100%)"}) 
-        rows = l.findChildren('tr')
-        total = 0
-        for i,row in enumerate(rows):
-                cells = row.findChildren('td')
-                for idx,cell in enumerate(cells):
-                    value = cell.string
-                    #if idx == 0 or idx == 4:
-                        #print(value, end =" ")
-                    if idx == 4:
-                        s = value.split('%')[0]
-                        if "+" in s:
-                            s1 = s.split('+')[1]
-                            total += float(s1)
-                        elif "-" in s:
-                            s1 = s.split('-')[1]
-                            total -= float(s1)
-                        
-                        
-                #print()      
-        print("Total % Change:", total/i)
-        print()
-    else: 
-        print("Error") 
+    sector = 'Communication Service'
+    scrap(url, sector)
 
 def ConsumerCyclical():
-    
     url='https://finance.yahoo.com/sector/ms_consumer_cyclical'
-    #open with GET method 
-    resp=requests.get(url) 
-      
-    #http_respone 200 means OK status 
-    if resp.status_code==200: 
-        
-        print("Consumer Cyclical Sector Yahoo Finance :") 
-      
-        # we need a parser,Python built-in HTML parser is enough . 
-        soup=BeautifulSoup(resp.text,'html.parser')     
-
-        l=soup.find("table",{"class":"W(100%)"}) 
-        rows = l.findChildren('tr')
-        total = 0
-        for i,row in enumerate(rows):
-                cells = row.findChildren('td')
-                for idx,cell in enumerate(cells):
-                    value = cell.string
-                    #if idx == 0 or idx == 4:
-                        #print(value, end =" ")
-                    if idx == 4:
-                        s = value.split('%')[0]
-                        if "+" in s:
-                            s1 = s.split('+')[1]
-                            total += float(s1)
-                        elif "-" in s:
-                            s1 = s.split('-')[1]
-                            total -= float(s1)
-                        
-                        
-                #print()      
-        print("Total % Change:", total/i)
-        print()
-    else: 
-        print("Error") 
+    sector = 'Consumer Syclical'
+    scrap(url, sector)
 
 def ConsumerDefensive():
-    
     url='https://finance.yahoo.com/sector/ms_consumer_defensive'
-    #open with GET method 
-    resp=requests.get(url) 
-      
-    #http_respone 200 means OK status 
-    if resp.status_code==200: 
-        
-        print("Consumer Defensive Sector Yahoo Finance :") 
-      
-        # we need a parser,Python built-in HTML parser is enough . 
-        soup=BeautifulSoup(resp.text,'html.parser')     
-
-        l=soup.find("table",{"class":"W(100%)"}) 
-        rows = l.findChildren('tr')
-        total = 0
-        for i,row in enumerate(rows):
-                cells = row.findChildren('td')
-                for idx,cell in enumerate(cells):
-                    value = cell.string
-                    #if idx == 0 or idx == 4:
-                        #print(value, end =" ")
-                    if idx == 4:
-                        s = value.split('%')[0]
-                        if "+" in s:
-                            s1 = s.split('+')[1]
-                            total += float(s1)
-                        elif "-" in s:
-                            s1 = s.split('-')[1]
-                            total -= float(s1)
-                        
-                        
-                #print()      
-        print("Total % Change:", total/i)
-        print()
-    else: 
-        print("Error") 
+    sector = 'Consumer Defensive'
+    scrap(url, sector)
 
 def HealthCare():
     
     url='https://finance.yahoo.com/sector/ms_healthcare'
-    #open with GET method 
-    resp=requests.get(url) 
-      
-    #http_respone 200 means OK status 
-    if resp.status_code==200: 
-        
-        print("Healthcare Sector Yahoo Finance :") 
-      
-        # we need a parser,Python built-in HTML parser is enough . 
-        soup=BeautifulSoup(resp.text,'html.parser')     
-
-        l=soup.find("table",{"class":"W(100%)"}) 
-        rows = l.findChildren('tr')
-        total = 0
-        for i,row in enumerate(rows):
-                cells = row.findChildren('td')
-                for idx,cell in enumerate(cells):
-                    value = cell.string
-                    #if idx == 0 or idx == 4:
-                        #print(value, end =" ")
-                    if idx == 4:
-                        s = value.split('%')[0]
-                        if "+" in s:
-                            s1 = s.split('+')[1]
-                            total += float(s1)
-                        elif "-" in s:
-                            s1 = s.split('-')[1]
-                            total -= float(s1)
-                        
-                        
-                #print()      
-        print("Total % Change:", total/i)
-        print()
-    else: 
-        print("Error") 
+    sector = 'Health Care'
+    scrap(url, sector)
 
 def Industrial():
     
     url='https://finance.yahoo.com/sector/ms_industrials'
-    #open with GET method 
-    resp=requests.get(url) 
-      
-    #http_respone 200 means OK status 
-    if resp.status_code==200: 
-        
-        print("Industrial Sector Yahoo Finance :") 
-      
-        # we need a parser,Python built-in HTML parser is enough . 
-        soup=BeautifulSoup(resp.text,'html.parser')     
-
-        l=soup.find("table",{"class":"W(100%)"}) 
-        rows = l.findChildren('tr')
-        total = 0
-        for i,row in enumerate(rows):
-                cells = row.findChildren('td')
-                for idx,cell in enumerate(cells):
-                    value = cell.string
-                    #if idx == 0 or idx == 4:
-                        #print(value, end =" ")
-                    if idx == 4:
-                        s = value.split('%')[0]
-                        if "+" in s:
-                            s1 = s.split('+')[1]
-                            total += float(s1)
-                        elif "-" in s:
-                            s1 = s.split('-')[1]
-                            total -= float(s1)
-                        
-                        
-                #print()      
-        print("Total % Change:", total/i)
-        print()
-    else: 
-        print("Error") 
+    sector = 'Industrial'
+    scrap(url, sector)
 
 def RealEstate():
     
     url='https://finance.yahoo.com/sector/ms_real_estate'
-    #open with GET method 
-    resp=requests.get(url) 
-      
-    #http_respone 200 means OK status 
-    if resp.status_code==200: 
-        
-        print("Real Estate Sector Yahoo Finance :") 
-      
-        # we need a parser,Python built-in HTML parser is enough . 
-        soup=BeautifulSoup(resp.text,'html.parser')     
+    sector = 'Real Estate'
+    scrap(url, sector)
 
-        l=soup.find("table",{"class":"W(100%)"}) 
-        rows = l.findChildren('tr')
-        total = 0
-        for i,row in enumerate(rows):
-                cells = row.findChildren('td')
-                for idx,cell in enumerate(cells):
-                    value = cell.string
-                    #if idx == 0 or idx == 4:
-                        #print(value, end =" ")
-                    if idx == 4:
-                        s = value.split('%')[0]
-                        if "+" in s:
-                            s1 = s.split('+')[1]
-                            total += float(s1)
-                        elif "-" in s:
-                            s1 = s.split('-')[1]
-                            total -= float(s1)
-                        
-                        
-                #print()      
-        print("Total % Change:", total/i)
-        print()
-    else: 
-        print("Error") 
 def Utilities():
     
     url='https://finance.yahoo.com/sector/ms_utilities'
-    #open with GET method 
-    resp=requests.get(url) 
-      
-    #http_respone 200 means OK status 
-    if resp.status_code==200: 
-        
-        print("Utilities Sector Yahoo Finance :") 
-      
-        # we need a parser,Python built-in HTML parser is enough . 
-        soup=BeautifulSoup(resp.text,'html.parser')     
+    sector = 'Utilities'
+    scrap(url, sector)
 
-        l=soup.find("table",{"class":"W(100%)"}) 
-        rows = l.findChildren('tr')
-        total = 0
-        for i,row in enumerate(rows):
-                cells = row.findChildren('td')
-                for idx,cell in enumerate(cells):
-                    value = cell.string
-                    #if idx == 0 or idx == 4:
-                        #print(value, end =" ")
-                    if idx == 4:
-                        s = value.split('%')[0]
-                        if "+" in s:
-                            s1 = s.split('+')[1]
-                            total += float(s1)
-                        elif "-" in s:
-                            s1 = s.split('-')[1]
-                            total -= float(s1)
-                        
-                        
-                #print()      
-        print("Total % Change:", total/i)
-        print()
-    else: 
-        print("Error") 
 def Energy():
     
     url='https://finance.yahoo.com/sector/ms_energy'
-    #open with GET method 
-    resp=requests.get(url) 
-      
-    #http_respone 200 means OK status 
-    if resp.status_code==200: 
-        
-        print("Energy Sector Yahoo Finance :") 
-      
-        # we need a parser,Python built-in HTML parser is enough . 
-        soup=BeautifulSoup(resp.text,'html.parser')     
+    sector = 'Energy'
+    scrap(url, sector)
 
-        l=soup.find("table",{"class":"W(100%)"}) 
-        rows = l.findChildren('tr')
-        total = 0
-        for i,row in enumerate(rows):
-                cells = row.findChildren('td')
-                for idx,cell in enumerate(cells):
-                    value = cell.string
-                    #if idx == 0 or idx == 4:
-                        #print(value, end =" ")
-                    if idx == 4:
-                        s = value.split('%')[0]
-                        if "+" in s:
-                            s1 = s.split('+')[1]
-                            total += float(s1)
-                        elif "-" in s:
-                            s1 = s.split('-')[1]
-                            total -= float(s1)
-                        
-                        
-                #print()      
-        print("Total % Change:", total/i)
-        print()
-    else: 
-        print("Error") 
 tech()
 financial()
 basicMaterial()
