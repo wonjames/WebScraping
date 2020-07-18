@@ -19,12 +19,15 @@ def scrap(newUrl, sector):
         rows = l.findChildren('tr')
         total = 0
         peTotal = 0
+        avgVolume = 0
         for i,row in enumerate(rows):
                 cells = row.findChildren('td')
                 for idx,cell in enumerate(cells):
                     value = cell.string
-                    if idx == 0 or idx == 4:
-                        print(value, end =" ")
+                    '''if idx == 0 or idx == 4:
+                        print(value, end =" ")'''
+                    # gets the percent change daily
+                    # adds it to the total
                     if idx == 4:
                         s = value.split('%')[0]
                         if "+" in s:
@@ -33,7 +36,19 @@ def scrap(newUrl, sector):
                         elif "-" in s:
                             s1 = s.split('-')[1]
                             total -= float(s1)
-                    
+                    # avg volume
+                    if idx == 6:
+                        s = str(cell)
+                        s1 = s.split('-->')[1]
+                        s2 = s1.split('<!--')[0]
+                        s3 = s2.replace(",","")
+                        if "M" in s3:
+                            s4 = s3.split('M')[0]
+                            avgVolume += float(s4)*1000000
+                        else:
+                            avgVolume += float(s3)
+                    # gets the PE ratio
+                    # adds it to the peTotal
                     if idx == 8:
                         if value != 'N/A':
                             s = str(cell)
@@ -41,13 +56,14 @@ def scrap(newUrl, sector):
                             s2 = s1.split('<!--')[0]
                             s3 = s2.replace(",","")
                             peTotal += float(s3)
-                            print(s3, end =" ")
-                        else:
-                            print("N/A", end = " ")
+                            # print(s3, end =" ")
+                        #else:
+                            #print("N/A", end = " ")
                         
-                print()      
-        print("Total % Change: "+"{:.4f}".format(total/i))
-        print("Total PE Ratio: "+"{:.4f}".format(peTotal/i))
+                #print()      
+        print("Average % Change: "+"{:.4f}".format(total/i))
+        print("Average PE Ratio: "+"{:.4f}".format(peTotal/i))
+        print("Average Volume (3 mo): "+"{:,.2f}".format(avgVolume/i))
         print()
     else: 
         print("Error") 
@@ -55,7 +71,7 @@ def scrap(newUrl, sector):
 def tech():
     url = 'https://finance.yahoo.com/sector/ms_technology' 
     sector = 'Technology'
-    scrap(url, sector)
+    scrap(url, sector)\
 
 def financial():
     url='https://finance.yahoo.com/sector/ms_financial_services'
