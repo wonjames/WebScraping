@@ -2,10 +2,10 @@ import requests
 from bs4 import BeautifulSoup 
   
 def scrap(newUrl, sector):
-    url=newUrl
+    url = newUrl
       
     #open with GET method 
-    resp=requests.get(url) 
+    resp = requests.get(url) 
       
     #http_respone 200 means OK status 
     if resp.status_code==200: 
@@ -13,9 +13,9 @@ def scrap(newUrl, sector):
         print(sector, "Sector:") 
       
         # we need a parser,Python built-in HTML parser is enough . 
-        soup=BeautifulSoup(resp.text,'html.parser')     
+        soup = BeautifulSoup(resp.text,'html.parser')     
 
-        l=soup.find("table",{"class":"W(100%)"}) 
+        l = soup.find("table",{"class":"W(100%)"}) 
         rows = l.findChildren('tr')
         total = 0
         peTotal = 0
@@ -57,8 +57,6 @@ def scrap(newUrl, sector):
                             s3 = s2.replace(",","")
                             peTotal += float(s3)
                             # print(s3, end =" ")
-                        #else:
-                            #print("N/A", end = " ")
                         
                 #print()      
         print("Average % Change: "+"{:.4f}".format(total/i))
@@ -71,7 +69,7 @@ def scrap(newUrl, sector):
 def tech():
     url = 'https://finance.yahoo.com/sector/ms_technology' 
     sector = 'Technology'
-    scrap(url, sector)\
+    scrap(url, sector)
 
 def financial():
     url='https://finance.yahoo.com/sector/ms_financial_services'
