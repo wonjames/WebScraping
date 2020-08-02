@@ -42,7 +42,29 @@ def key_s(arr):
             # we need a parser,Python built-in HTML parser is enough . 
             soup = BeautifulSoup(resp.text,'html.parser')     
             num = 0
+            
+            # gets the right table
             while num < 3:
+                l = soup.find_all("table",{"class":"W(100%) Bdcl(c)"})[num]
+
+                rows = l.findChildren('tr')
+
+                for i,row in enumerate(rows):
+                        cells = row.findChildren('td')
+                        for idx,cell in enumerate(cells):
+                            if idx == 0:
+                                name = cell
+                                if name.text.endswith("1") or name.text.endswith("2") or name.text.endswith("3") or name.text.endswith("4") or name.text.endswith("5"):
+                                    str = name.text[:-1]
+                                    print(str, end=" ")
+                                else:
+                                    print(name.text, end=" ")
+                            else:
+                                value = cell.string
+                                print(value)
+                num += 1
+            # gets the left table 
+            while num < 9:
                 l = soup.find_all("table",{"class":"W(100%) Bdcl(c)"})[num]
 
                 rows = l.findChildren('tr')
