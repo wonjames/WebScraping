@@ -2,13 +2,14 @@ import requests
 from bs4 import BeautifulSoup 
 import gspread
 import datetime
-import sleep
+import time
 from time import sleep
   
 gc = gspread.oauth()
-sh = gc.open("stocks")
+sh = gc.open("industries_top_100")
+work_sheet = None
 
-def scrap(newUrl, sector, worksheet):
+def scrap(newUrl, sector):
     url = newUrl
     #open with GET method 
     resp = requests.get(url) 
@@ -23,7 +24,20 @@ def scrap(newUrl, sector, worksheet):
         total = 0
         peTotal = 0
         avgVolume = 0
-        worksheet.format('A1:E1', {    
+        count = 0
+
+        list_worksheets = sh.worksheets()
+        check = False
+        for wks in list_worksheets:
+            if wks.title == sector:
+                check = True
+                work_sheet = sh.worksheet(sector)
+                break
+        
+        if check == False:
+            work_sheet = sh.add_worksheet(title=sector, rows=110, cols=15)
+
+        work_sheet.format('A1:F1', {    
             "backgroundColor": {
             "red": 1.0,
             "green": 1.0,
@@ -41,18 +55,18 @@ def scrap(newUrl, sector, worksheet):
             }
             })
         date = time.strftime("%m/%d/%Y")
-        worksheet.update('A1', date)
-        worksheet.update('B1', "Ticker")
-        worksheet.update('C1', "Price")
-        worksheet.update('D1', "% Change")
-        worksheet.update('E1', "Avg Vol 3mo")
-        worksheet.update('F1', "P/E Ratio")
+        work_sheet.update('A1', date)
+        work_sheet.update('B1', "Ticker")
+        work_sheet.update('C1', "Price")
+        work_sheet.update('D1', "% Change")
+        work_sheet.update('E1', "Avg Vol 3mo")
+        work_sheet.update('F1', "P/E Ratio")
         sleep(5.01)
-        cellB = worksheet.range('B2:B101')
-        cellC = worksheet.range('C2:C101')
-        cellD = worksheet.range('D2:D101')
-        cellE = worksheet.range('E2:E101')
-        cellF = worksheet.range('F2:F101')
+        cellB = work_sheet.range('B2:B101')
+        cellC = work_sheet.range('C2:C104')
+        cellD = work_sheet.range('D2:D101')
+        cellE = work_sheet.range('E2:E101')
+        cellF = work_sheet.range('F2:F101')
 
         for i,row in enumerate(rows):
             cells = row.findChildren('td')
@@ -92,93 +106,101 @@ def scrap(newUrl, sector, worksheet):
                         s = str(cell)
                         s1 = s.split('-->')[1]
                         s2 = s1.split('<!--')[0]
-                        cellF[count].value = value
+                        cellF[count].value = s2
                         s3 = s2.replace(",","")
                         peTotal += float(s3)
                         # print(s3, end =" ")
                     else:
                         start_time = datetime.datetime.now()
                         cellF[count].value = value
-                        
-                #print()  
-                worksheet.update_cells(cellB)
-                worksheet.update_cells(cellC)    
-                worksheet.update_cells(celLD)
-                worksheet.update_cells(cellE)
-                worksheet.update_cells(cellF)
-                sleep(5.01)
-        print("Average % Change: "+"{:.4f}".format(total/i))
-        print("Average PE Ratio: "+"{:.4f}".format(peTotal/i))
-        print("Average Volume (3 mo): "+"{:,.2f}".format(avgVolume/i))
+                    count += 1
+        #print()  
+        
+        change = "{:.2f}".format(total/i)+"%"
+        peRatio = "{:.4f}".format(peTotal/i)
+        avg3mo = "{:,.2f}".format(avgVolume/i)
+        
+        cellA = work_sheet.range('A102:A104')
+        cellA[0].value = "Average % change"
+        cellA[1].value = "Average PE Ratio"
+        cellA[2].value = "Average Volume 3 mo"
+        cellC[count].value = change
+        count+=1
+        cellC[count].value = peRatio
+        count+=1
+        cellC[count].value = avg3mo
+        work_sheet.update_cells(cellA)
+        work_sheet.update_cells(cellB)
+        work_sheet.update_cells(cellC)    
+        work_sheet.update_cells(cellD)
+        work_sheet.update_cells(cellE)
+        work_sheet.update_cells(cellF)
+        sleep(6.01)
+        print("Average % Change: "+ change)
+        print("Average PE Ratio: "+peRatio)
+        print("Average Volume (3 mo): "+avg3mo)
         print()
     else: 
         print("Error") 
 
+
 def tech():
     url = 'https://finance.yahoo.com/sector/ms_technology' 
     sector = 'Technology'
-    work_sheet = sh.worksheet("Technology")
-    scrap(url, sector, work_sheet)
+    scrap(url, sector)
 
 def financial():
     url='https://finance.yahoo.com/sector/ms_financial_services'
     sector = 'Financial'
-    work_sheet = sh.worksheet("Financial")
-    scrap(url, sector, work_sheet)
+    scrap(url, sector)
 
 def basicMaterial():
     url='https://finance.yahoo.com/sector/ms_basic_materials'
     sector = 'Basic Material'
-    work_sheet = sh.worksheet("Basic Material")
-    scrap(url, sector, work_sheet)
+    scrap(url, sector)
 
 def CommunicationService():
     url='https://finance.yahoo.com/sector/ms_communication_services'
     sector = 'Communication Service'
-    work_sheet = sh.worksheet("Communication Service")
-    scrap(url, sector, work_sheet)
+    scrap(url, sector)
 
 def ConsumerCyclical():
     url='https://finance.yahoo.com/sector/ms_consumer_cyclical'
     sector = 'Consumer Cyclical'
-    work_sheet = sh.worksheet("Consumer Cyclical")
-    scrap(url, sector, work_sheet)
+    scrap(url, sector)
 
 def ConsumerDefensive():
     url='https://finance.yahoo.com/sector/ms_consumer_defensive'
     sector = 'Consumer Defensive'
-    work_sheet = sh.worksheet("Consumer Defensive")
-    scrap(url, sector, work_sheet)
+    scrap(url, sector)
 
 def HealthCare():
     url='https://finance.yahoo.com/sector/ms_healthcare'
     sector = 'Health Care'
-    work_sheet = sh.worksheet("Health Care")
-    scrap(url, sector, work_sheet)
+    scrap(url, sector)
 
 def Industrial():
     url='https://finance.yahoo.com/sector/ms_industrials'
     sector = 'Industrial'
-    work_sheet = sh.worksheet("Industrial")
-    scrap(url, sector, work_sheet)
+    scrap(url, sector)
 
 def RealEstate():
     url='https://finance.yahoo.com/sector/ms_real_estate'
     sector = 'Real Estate'
-    work_sheet = sh.worksheet("Real Estate")
-    scrap(url, sector, work_sheet)
+    scrap(url, sector)
 
 def Utilities():
     url='https://finance.yahoo.com/sector/ms_utilities'
     sector = 'Utilities'
-    work_sheet = sh.worksheet("Utilities")
-    scrap(url, sector, work_sheet)
+    scrap(url, sector)
 
 def Energy():
     url='https://finance.yahoo.com/sector/ms_energy'
     sector = 'Energy'
-    work_sheet = sh.worksheet("Energy")
-    scrap(url, sector, work_sheet)
+    scrap(url, sector)
+
+
+
 
 tech()
 financial()
