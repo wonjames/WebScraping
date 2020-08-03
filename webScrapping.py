@@ -2,111 +2,111 @@ import requests
 from bs4 import BeautifulSoup 
 import gspread
 import datetime
+import sleep
 from time import sleep
   
 gc = gspread.oauth()
 sh = gc.open("stocks")
 
-def scrap(newUrl, sector, work_sheet):
+def scrap(newUrl, sector, worksheet):
     url = newUrl
-      
     #open with GET method 
     resp = requests.get(url) 
-      
+
     #http_respone 200 means OK status 
     if resp.status_code==200: 
-        
         print(sector, "Sector:") 
-      
         # we need a parser,Python built-in HTML parser is enough . 
         soup = BeautifulSoup(resp.text,'html.parser')     
-
         l = soup.find("table",{"class":"W(100%)"}) 
         rows = l.findChildren('tr')
         total = 0
         peTotal = 0
         avgVolume = 0
+        worksheet.format('A1:E1', {    
+            "backgroundColor": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0
+            },
+            "horizontalAlignment": "CENTER",
+            "textFormat": {
+            "foregroundColor": {
+                "red": 0.0,
+                "green": 0.0,
+                "blue": 0.0
+            },
+            "fontSize": 12,
+            "bold": True
+            }
+            })
+        date = time.strftime("%m/%d/%Y")
+        worksheet.update('A1', date)
+        worksheet.update('B1', "Ticker")
+        worksheet.update('C1', "Price")
+        worksheet.update('D1', "% Change")
+        worksheet.update('E1', "Avg Vol 3mo")
+        worksheet.update('F1', "P/E Ratio")
+        sleep(5.01)
+        cellB = worksheet.range('B2:B101')
+        cellC = worksheet.range('C2:C101')
+        cellD = worksheet.range('D2:D101')
+        cellE = worksheet.range('E2:E101')
+        cellF = worksheet.range('F2:F101')
+
         for i,row in enumerate(rows):
-                cells = row.findChildren('td')
-                for idx,cell in enumerate(cells):
-                    value = cell.string
-                    # Ticker 
-                    if idx == 0:
-                        # prints to the google sheets, timer is added to not hit the write limit 
-                        col = "A"+str(i+1)
-                        start_time = datetime.datetime.now()
-                        work_sheet.update(col, value)
-                        end_time = datetime.datetime.now()
-                        if (end_time - start_time).total_seconds() < 1:
-                            sleep(1.01)
-                    # Price
-                    if idx == 2:
-                        col = "B"+str(i+1)
-                        start_time = datetime.datetime.now()
-                        work_sheet.update(col, value)
-                        end_time = datetime.datetime.now()
-                        if (end_time - start_time).total_seconds() < 1:
-                            sleep(1.01)
-                    # Percent change daily
-                    if idx == 4:
-                        col = "C"+str(i+1)
-                        start_time = datetime.datetime.now()
-                        work_sheet.update(col, value)
-                        end_time = datetime.datetime.now()
-                        if (end_time - start_time).total_seconds() < 1:
-                            sleep(1.01)
-                        s = value.split('%')[0]
-                        if "+" in s:
-                            s1 = s.split('+')[1]
-                            total += float(s1)
-                        elif "-" in s:
-                            s1 = s.split('-')[1]
-                            total -= float(s1)
-                    # avg volume
-                    if idx == 6:
-                        col = "D"+str(i+1)
+            cells = row.findChildren('td')
+            for idx,cell in enumerate(cells):
+                value = cell.string
+                # Ticker 
+                if idx == 0:
+                    cellB[count].value = value
+                # Price
+                if idx == 2:
+                    cellC[count].value = value
+                # Percent change daily
+                if idx == 4:
+                    cellD[count].value = value
+                    s = value.split('%')[0]
+                    if "+" in s:
+                        s1 = s.split('+')[1]
+                        total += float(s1)
+                    elif "-" in s:
+                        s1 = s.split('-')[1]
+                        total -= float(s1)
+                # avg volume
+                if idx == 6:
+                    s = str(cell)
+                    s1 = s.split('-->')[1]
+                    s2 = s1.split('<!--')[0]
+                    cellE[count].value = s2
+                    s3 = s2.replace(",","")
+                    if "M" in s3:
+                        s4 = s3.split('M')[0]
+                        avgVolume += float(s4)*1000000
+                    else:
+                        avgVolume += float(s3)
+                # PE ratio
+                if idx == 8:
+                    if value != 'N/A':
                         s = str(cell)
                         s1 = s.split('-->')[1]
                         s2 = s1.split('<!--')[0]
-
-                        start_time = datetime.datetime.now()
-                        work_sheet.update(col, s2)
-                        end_time = datetime.datetime.now()
-                        if (end_time - start_time).total_seconds() < 1:
-                            sleep(1.01)
-
+                        cellF[count].value = value
                         s3 = s2.replace(",","")
-                        if "M" in s3:
-                            s4 = s3.split('M')[0]
-                            avgVolume += float(s4)*1000000
-                        else:
-                            avgVolume += float(s3)
-                    # PE ratio
-                    if idx == 8:
-                        col = "E"+str(i+1)
+                        peTotal += float(s3)
+                        # print(s3, end =" ")
+                    else:
+                        start_time = datetime.datetime.now()
+                        cellF[count].value = value
                         
-                        if value != 'N/A':
-                            s = str(cell)
-                            s1 = s.split('-->')[1]
-                            s2 = s1.split('<!--')[0]
-
-                            start_time = datetime.datetime.now()
-                            work_sheet.update(col, s2)
-                            end_time = datetime.datetime.now()
-                            if (end_time - start_time).total_seconds() < 1:
-                                sleep(1.01)
-
-                            s3 = s2.replace(",","")
-                            peTotal += float(s3)
-                            # print(s3, end =" ")
-                        else:
-                            start_time = datetime.datetime.now()
-                            work_sheet.update(col, value)
-                            end_time = datetime.datetime.now()
-                            if (end_time - start_time).total_seconds() < 1:
-                                sleep(1.01)
-                        
-                #print()      
+                #print()  
+                worksheet.update_cells(cellB)
+                worksheet.update_cells(cellC)    
+                worksheet.update_cells(celLD)
+                worksheet.update_cells(cellE)
+                worksheet.update_cells(cellF)
+                sleep(5.01)
         print("Average % Change: "+"{:.4f}".format(total/i))
         print("Average PE Ratio: "+"{:.4f}".format(peTotal/i))
         print("Average Volume (3 mo): "+"{:,.2f}".format(avgVolume/i))
@@ -180,8 +180,8 @@ def Energy():
     work_sheet = sh.worksheet("Energy")
     scrap(url, sector, work_sheet)
 
-#tech()
-#financial()
+tech()
+financial()
 basicMaterial()
 CommunicationService()
 ConsumerCyclical()
