@@ -1,4 +1,4 @@
-# WebScrapping
+# WebScraping
 Summer project 2020
 Recently I have gained interest in the Stock market. 
 I decided to make a program to store data of about individual stocks, that I can reference later.
